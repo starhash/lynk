@@ -1,0 +1,77 @@
+Collection c = new Collection();
+
+Collection result = Lynk.eval("select x from {0} if {2}(x)", c, (int y) -> y < 0);
+
+Collection result = Lynk.eval("select(x) from({0}) where({1})", c, (int y) -> y < 0);
+
+
+aggregate(x) from({0}) apply({1})
+aggregate(x) from({0}) seed({1}) apply({2})
+aggregate(x) from({0}) seed({1}) transform({2}) apply({3})
+
+all({1}) from ({0})
+
+any({1}) from ({0})
+
+average({0})
+average({0}) transform({1})
+
+cast({0})
+
+concat({0} {1} ...)
+
+contains({1}) in({0})
+
+count({0})
+count({0}) where({1})
+
+select(x) from({0}) distinct()
+select(x) from({0}) distinct() compare({1})
+
+select(x) from({0}) except({1})
+select(x) from({0}) except({1}) compare({1})
+
+select(x) from({0}) group-by({1})
+select(x) from({0}) group-by({1}) compare({2})
+select(x) from({0}) group-by({1}) transform({2})
+select(x) from({0}) group-by({1}) compare({2}) transform({3})
+select(x) from({0}) group-by({1}) group-apply({2})
+
+group-join({0}) with({1}) compare({2})
+
+intersect({0}) with({1})
+intersect({0}) with({1}) compare({2})
+
+join({0}) with({1})
+join({0}) with({1}) compare({2})
+
+max({0})
+max({0}) compare({1})
+
+min({0})
+min({0}) compare({1})
+
+select(x) from({0}) where(x oftype({0}))
+
+select(x) from({0}) order-by({1}) ascending()
+select(x) from({0}) order-by({1}) descending()
+
+reverse({0})
+
+skip({1}) from({0})
+skip-while({1}) from({0})
+
+sum({0})
+sum({0}) apply({1})
+
+take({1}) from({0})
+take-while({1}) from({0})
+
+union({0}) with({1} {2} ...)
+
+zip({2}) from({0}) with({1})
+
+
+Complex Lynk Expressions
+------------------------
+intersect(select(x) from({0}) distinct()) with(select(y) from({1}) distinct())
