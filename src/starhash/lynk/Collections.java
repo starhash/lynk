@@ -23,6 +23,10 @@ public class Collections {
 
     public static Collection evaluate(String expr, Object... args) {
         ParseTreeNode root = new ExpressionParser().parseExpression(expr);
+        return evaluate(root, args);
+    }
+
+    public static Collection evaluate(ParseTreeNode root, Object... args) {
         if (root != null) {
             if (root.getChild(0).getName().equals("SelectStatement")) {
                 return evaluateSelectStatement(root.getChild(0), args);
@@ -30,25 +34,48 @@ public class Collections {
         }
         return null;
     }
-    
+
     public static boolean evaluateBoolean(String expr, Object... args) {
         ParseTreeNode root = new ExpressionParser().parseExpression(expr);
         if (root != null) {
-            if (root.getChild(0).getName().equals("AnyStatement")) {
-                return evaulateAnyStatement(root.getChild(0), args);
+            switch (root.getChild(0).getName()) {
+                case "AnyStatement":
+                    return evaulateAnyStatement(root.getChild(0), args);
+                case "AllStatement":
+                    return evaulateAllStatement(root.getChild(0), args);
             }
         }
         return false;
+    }
+
+    public static boolean evaulateAllStatement(ParseTreeNode anyNode, Object... args) {
+        int fromArgument = -1;
+        int conditionalArgument = Integer.parseInt(anyNode.getNode("All").getChild(0, 0, 0).getValue());
+        Collection source = null;
+        try {
+            fromArgument = Integer.parseInt(anyNode.getNode("From").getChild(0, 0).getValue());
+            source = (Collection) args[fromArgument];
+        } catch (NumberFormatException numberFormatException) {
+            source = evaluate(anyNode.getNode("From").getChild(0), args);
+        }
+        PredicateWrapper condition = (PredicateWrapper) args[conditionalArgument];
+        for (Object object : source) {
+            if (!condition.invoke(object)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public static boolean evaulateAnyStatement(ParseTreeNode anyNode, Object... args) {
         int fromArgument = Integer.parseInt(anyNode.getNode("From").getChild(0, 0).getValue());
         int conditionalArgument = Integer.parseInt(anyNode.getNode("Any").getChild(0, 0, 0).getValue());
         Collection source = (Collection) args[fromArgument];
-        PredicateWrapper condition = (PredicateWrapper)args[conditionalArgument];
+        PredicateWrapper condition = (PredicateWrapper) args[conditionalArgument];
         for (Object object : source) {
-            if (condition.invoke(object))
+            if (condition.invoke(object)) {
                 return true;
+            }
         }
         return false;
     }
@@ -77,7 +104,7 @@ public class Collections {
                     if (selectNode.getNode("Compare") != null) {
                         int whichCompare = Integer.parseInt(selectNode.getNode("Compare").getChild(0, 0).getValue());
                         BiFunctionWrapper compare = (BiFunctionWrapper) args[whichCompare];
-                        if (evaluateBoolean("any({1}) from({0})", destination, new PredicateWrapper<>((Object arg) -> (Boolean)compare.invoke(arg, object)))) {
+                        if (evaluateBoolean("any({1}) from({0})", destination, new PredicateWrapper<>((Object arg) -> (Boolean) compare.invoke(arg, object)))) {
                             continue;
                         }
                     } else if (evaluateBoolean("any({1}) from({0})", destination, new PredicateWrapper<>((Object arg) -> arg.equals(object)))) {

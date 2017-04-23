@@ -24,21 +24,20 @@ public class RunLynk {
      * @throws javax.xml.stream.XMLStreamException
      */
     public static void main(String[] args) throws XMLStreamException {
-        ArrayList arg0 = new ArrayList(java.util.Arrays.asList(1, 1, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 5));
+        ArrayList arg0 = new ArrayList(java.util.Arrays.asList(2, 4, 4, 6, 6, 6, 8, 8, 8, 8, 9, 10));
         String expression = "all({3}) from(select(x) from({0}) where({1}(x)) distinct(x) compare({2}))";
         
         ParseTreeNode root = new ExpressionParser().parseExpression(expression);
         System.out.println(root);
         
-        Collection result = Collections.evaluate(
+        boolean result = Collections.evaluateBoolean(
                 expression, 
                 arg0, 
                 new PredicateWrapper<>((Integer i) -> i > 0),
-                new BiFunctionWrapper<>((Integer arg1, Integer arg2) -> arg1.equals(arg2))
+                new BiFunctionWrapper<>((Integer arg1, Integer arg2) -> arg1.equals(arg2)),
+                new PredicateWrapper<>((Integer i) -> i % 2 == 0)
         );
-        for (Object object : result) {
-            System.out.println(object);
-        }
+        System.out.println("All elements above zero and divisible by 2? " + result);
     }
 
 }
